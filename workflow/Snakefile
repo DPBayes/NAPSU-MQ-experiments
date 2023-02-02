@@ -1,0 +1,267 @@
+
+localrules: all
+
+rule all:
+    input:
+        adult_reduced_report="processed_report-adult-reduced.py.ipynb",
+        report_toy_data="processed_report-toy-data.py.ipynb",
+        report_us_census="processed_report-us-census.py.ipynb",
+        toy_data_results="results/toy-data/results.csv",
+        toy_data_fail_counts="results/toy-data/fail-counts.csv",
+        results="results/adult-reduced/results.csv",
+        classification_accuracies="results/adult-reduced/classification-results.csv",
+        marginal_accuracies="results/adult-reduced/marginal-accuracy-results.csv",
+        runtimes="results/adult-reduced/runtime.csv",
+        rhats="results/adult-reduced/rhats.csv",
+        fail_counts="results/adult-reduced/fail-counts.csv",
+
+module toy_data:
+    snakefile: 
+        "rules/toy-data.smk"
+    config: config
+
+use rule * from toy_data as toy_data_*
+
+module us_census:
+    snakefile:
+        "rules/us-census.smk"
+    config: config
+
+use rule * from us_census as us_census_*
+
+# repeats = 20
+# epsilons = [0.1, 0.3, 0.5, 1.0]
+repeats = 2
+epsilons = [0.5, 1.0]
+algorithms = [
+    "max-ent", "PGM", "PGM-repeat-5", "PGM-repeat-10", "PGM-repeat-20", "RAP",
+    "PEP"
+]
+
+rule discretise_data:
+    input:
+        "datasets/adult.csv"
+    output:
+        "datasets/adult-reduced/adult-reduced-discretised.csv"
+    threads: 1
+    resources:
+        mem_mb=1000,
+        time="00:10:00"
+    script:
+        "scripts/adult-reduced-discretise-data.py"
+
+rule select_queries:
+    input:
+        "datasets/adult-reduced/adult-reduced-discretised.csv"
+    output:
+        "datasets/adult-reduced/queries.p"
+    threads: 1
+    resources:
+        mem_mb=1000,
+        time="00:10:00"
+    script:
+        "scripts/adult-reduced-select-queries.py"
+
+rule orig_result:
+    input:
+        "datasets/adult-reduced/adult-reduced-discretised.csv"
+    output:
+        "datasets/adult-reduced/orig_result.p"
+    threads: 1
+    resources:
+        mem_mb=1000,
+        time="00:10:00"
+    script:
+        "scripts/adult-reduced-orig-results.py"
+
+rule synth_data:
+    input:
+        data="datasets/adult-reduced/adult-reduced-discretised.csv",
+        queries="datasets/adult-reduced/queries.p"
+    output:
+        "results/adult-reduced/synth_data/{algo}_{repeat_ind}_{epsilon}.p"
+    threads: 4
+    resources:
+        mem_mb=1000,
+        time=lambda wildcards: "2-00:00:00" if wildcards.algo == "max-ent" else "1:00:00",
+        partition=lambda wildcards: "medium" if wildcards.algo == "max-ent" else "short"
+    script:
+        "scripts/adult-reduced-synth-data.py"
+
+rule extract_rhats:
+    input:
+        "results/adult-reduced/synth_data/{algo}_{repeat_ind}_{epsilon}.p"
+    output:
+        "results/adult-reduced/diagnostics/{algo}_{repeat_ind}_{epsilon}_rhat.csv"
+    threads: 1
+    resources:
+        mem_mb=1000,
+        time="00:10:00"
+    script:
+        "scripts/adult-reduced-extract-rhats.py"
+
+rule extract_fail_counts:
+    input:
+        "results/adult-reduced/synth_data/{algo}_{repeat_ind}_{epsilon}.p"
+    output:
+        "results/adult-reduced/diagnostics/{algo}_{repeat_ind}_{epsilon}_fail_count.csv"
+    threads: 1
+    resources:
+        mem_mb=1000,
+        time="00:10:00"
+    script:
+        "scripts/extract-laplace-restarts.py"
+
+rule merge_fail_counts:
+    input: 
+        expand(
+            "results/adult-reduced/diagnostics/{algo}_{repeat_ind}_{epsilon}_fail_count.csv",
+            epsilon=epsilons, repeat_ind=range(repeats), algo=["max-ent"]
+        )
+    output:
+        "results/adult-reduced/fail-counts.csv"
+    threads: 1
+    resources:
+        nodes=1,
+        mem_mb=10,
+        time="00:10:00",
+    shell: 
+        "{{ head -n 1 {input[0]}; tail -q -n +2 {input}; }} > {output}"
+    
+rule merge_rhats:
+    input: 
+        expand(
+            "results/adult-reduced/diagnostics/{algo}_{repeat_ind}_{epsilon}_rhat.csv",
+            epsilon=epsilons, repeat_ind=range(repeats), algo=["max-ent"]
+        )
+    output:
+        "results/adult-reduced/rhats.csv"
+    threads: 1
+    resources:
+        nodes=1,
+        mem_mb=10,
+        time="00:10:00",
+    shell: 
+        "{{ head -n 1 {input[0]}; tail -q -n +2 {input}; }} > {output}"
+
+rule analysis:
+    input:
+        syn_data="results/adult-reduced/synth_data/{algo}_{repeat_ind}_{epsilon}.p",
+        orig_result="datasets/adult-reduced/orig_result.p"
+    threads: 4
+    resources:
+        mem_mb=1000,
+        time="12:00:00",
+        partition="short"
+    output:
+        "results/adult-reduced/analysis/{algo}_{repeat_ind}_{epsilon}.csv"
+    script:
+        "scripts/adult-reduced-analysis.py"
+
+rule merge_analyses:
+    input: 
+        expand(
+            "results/adult-reduced/analysis/{algo}_{repeat_ind}_{epsilon}.csv",
+            epsilon=epsilons, repeat_ind=range(repeats), algo=algorithms
+        )
+    output:
+        "results/adult-reduced/results.csv"
+    threads: 1
+    resources:
+        nodes=1,
+        mem_mb=10,
+        time="00:10:00",
+    shell: 
+        "{{ head -n 1 {input[0]}; tail -q -n +2 {input}; }} > {output}"
+
+rule classification_accuracy:
+    input:
+        syn_data="results/adult-reduced/synth_data/{algo}_{repeat_ind}_{epsilon}.p",
+        orig_result="datasets/adult-reduced/orig_result.p"
+    threads: 1
+    resources: 
+        mem_mb=1000,
+        time="00:10:00"
+    output:
+        "results/adult-reduced/classification/{algo}_{repeat_ind}_{epsilon}.csv"
+    script:
+        "scripts/adult-reduced-classification-accuracy.py"
+   
+rule merge_classification_accuracies:
+    input: 
+        expand(
+            "results/adult-reduced/classification/{algo}_{repeat_ind}_{epsilon}.csv",
+            epsilon=epsilons, repeat_ind=range(repeats), algo=algorithms
+        )
+    output:
+        "results/adult-reduced/classification-results.csv"
+    threads: 1
+    resources:
+        nodes=1,
+        mem_mb=10,
+        time="00:10:00"
+    shell: 
+        "{{ head -n 1 {input[0]}; tail -q -n +2 {input}; }} > {output}"
+
+rule marginal_accuracy:
+    input:
+        syn_data="results/adult-reduced/synth_data/{algo}_{repeat_ind}_{epsilon}.p",
+        data="datasets/adult-reduced/adult-reduced-discretised.csv",
+    threads: 1
+    resources: 
+        mem_mb=1000,
+        time="01:00:00"
+    output:
+        "results/adult-reduced/marginal-accuracy/{algo}_{repeat_ind}_{epsilon}.csv"
+    script:
+        "scripts/adult-reduced-2way-marginal-accuracy.py"
+
+rule merge_marginal_accuracies:
+    input: 
+        expand(
+            "results/adult-reduced/marginal-accuracy/{algo}_{repeat_ind}_{epsilon}.csv",
+            epsilon=epsilons, repeat_ind=range(repeats), algo=algorithms
+        )
+    output:
+        "results/adult-reduced/marginal-accuracy-results.csv"
+    threads: 1
+    resources:
+        nodes=1,
+        mem_mb=10,
+        time="00:10:00"
+    shell: 
+        "{{ head -n 1 {input[0]}; tail -q -n +2 {input}; }} > {output}"
+
+rule runtime_report:
+    input:
+        expand(
+            "results/adult-reduced/synth_data/{algo}_{repeat_ind}_{epsilon}.p",
+            epsilon=epsilons, repeat_ind=range(repeats), algo=algorithms
+        )
+    output:
+        csv="results/adult-reduced/runtime.csv",
+        latex="latex/adult-reduced-runtime.tex"
+    threads: 1
+    resources:
+        nodes=1,
+        mem_mb=100,
+        time="00:10:00"
+    script:
+        "scripts/adult-reduced-runtime-report.py"
+
+rule report:
+    input:
+        results="results/adult-reduced/results.csv",
+        accuracy="results/adult-reduced/classification-results.csv",
+        rhats="results/adult-reduced/rhats.csv",
+        marginal_accuracy="results/adult-reduced/marginal-accuracy-results.csv"
+    log: 
+        notebook="processed_report-adult-reduced.py.ipynb"
+    threads: 1
+    resources:
+        nodes=1,
+        mem_mb=100,
+        time="00:10:00"
+    notebook:
+        "scripts/report-adult-reduced.py.ipynb"
+

@@ -1,0 +1,25 @@
+name: napsu-mq-env
+channels: 
+    - conda-forge
+dependencies: 
+    - python=3.9
+    - numpy=1.23.4
+    - pandas=1.5.1
+    - scipy=1.9.2
+    - pytorch=1.11.0
+    - pyro-ppl=1.8.2
+    - matplotlib
+    - seaborn
+    - statsmodels=0.13.2
+    - arviz
+    - pip
+    - jupyterlab
+    - ipywidgets
+    - jax=0.3.7
+    - jaxlib=0.3.7
+    - numpyro=0.10.1
+    - python-graphviz
+    - pip:
+        - snakemake
+        - git+https://github.com/ryan112358/private-pgm.git
+        - git+https://github.com/pytorch/functorch.git@release/0.1
