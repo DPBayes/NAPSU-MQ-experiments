@@ -1,0 +1,10 @@
+[submodule "relaxed-adaptive-projection"]
+	path = relaxed-adaptive-projection
+	url = git@github.com:oraisa/relaxed-adaptive-projection.git
+[submodule "iterative-dp"]
+	path = iterative-dp
+	url = https://github.com/terranceliu/iterative-dp.git
+	url = https://github.com/ParkLabML/DP-MERF.git
+[submodule "BayesLCM"]
+	path = BayesLCM
+	url = https://github.com/michellepistner/BayesLCM.git
