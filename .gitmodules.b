@@ -4,7 +4,6 @@
 [submodule "iterative-dp"]
 	path = iterative-dp
 	url = https://github.com/terranceliu/iterative-dp.git
-	url = https://github.com/ParkLabML/DP-MERF.git
 [submodule "BayesLCM"]
 	path = BayesLCM
 	url = https://github.com/michellepistner/BayesLCM.git
