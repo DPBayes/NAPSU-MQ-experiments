@@ -1,7 +1,7 @@
-# repeats = 100
-repeats = 2
-# epsilons = [0.1, 0.25, 0.5, 1, 10, 100]
-epsilons = [0.5, 1]
+repeats = 100
+# repeats = 2
+epsilons = [0.1, 0.25, 0.5, 1, 10, 100]
+# epsilons = [0.5, 1]
 algorithms = [
     "max-ent-all-queries", 
     "max-ent-no-noise-aware", 

@@ -29,10 +29,10 @@ module us_census:
 
 use rule * from us_census as us_census_*
 
-# repeats = 20
-# epsilons = [0.1, 0.3, 0.5, 1.0]
-repeats = 2
-epsilons = [0.5, 1.0]
+repeats = 20
+epsilons = [0.1, 0.3, 0.5, 1.0]
+# repeats = 2
+# epsilons = [0.5, 1.0]
 algorithms = [
     "max-ent", "PGM", "PGM-repeat-5", "PGM-repeat-10", "PGM-repeat-20", "RAP",
     "PEP"
