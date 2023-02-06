@@ -86,6 +86,15 @@ The subset of the dataset used in the experiment is included,
 so downloading the original dataset is not necessary to run 
 the experiments.
 
+# Runnning Data Pre-Processing
+
+The results of preprocessing the datasets are included in the repository,
+so those won't be re-run automatically. The pre-processing steps can be re-run 
+by deleting the files in the `datasets/adult-reduced` and `datasets/us-census`
+directories, and running `snakemake` as above. Note that the full US Census 
+data must downloaded and placed in `datasets` if 
+`datasets/us-census/reduced.csv` is deleted.
+
 # Navigating the Code
 
 The implementation of NAPSU-MQ is in the `lib` directory.
