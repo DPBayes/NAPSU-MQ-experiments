@@ -187,7 +187,8 @@ rule report:
     input:
         results="results/us-census/results.csv",
         rhats="results/us-census/rhats.csv",
-        marginal_accuracy="results/us-census/marginal-accuracy-results.csv"
+        marginal_accuracy="results/us-census/marginal-accuracy-results.csv",
+        orig_result="datasets/us-census/orig_result.p"
     log: 
         notebook="processed_report-us-census.py.ipynb"
     threads: 1

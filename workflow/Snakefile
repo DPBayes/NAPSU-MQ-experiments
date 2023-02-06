@@ -6,14 +6,14 @@ rule all:
         adult_reduced_report="processed_report-adult-reduced.py.ipynb",
         report_toy_data="processed_report-toy-data.py.ipynb",
         report_us_census="processed_report-us-census.py.ipynb",
-        toy_data_results="results/toy-data/results.csv",
-        toy_data_fail_counts="results/toy-data/fail-counts.csv",
-        results="results/adult-reduced/results.csv",
-        classification_accuracies="results/adult-reduced/classification-results.csv",
-        marginal_accuracies="results/adult-reduced/marginal-accuracy-results.csv",
-        runtimes="results/adult-reduced/runtime.csv",
-        rhats="results/adult-reduced/rhats.csv",
-        fail_counts="results/adult-reduced/fail-counts.csv",
+        # toy_data_results="results/toy-data/results.csv",
+        # toy_data_fail_counts="results/toy-data/fail-counts.csv",
+        # results="results/adult-reduced/results.csv",
+        # classification_accuracies="results/adult-reduced/classification-results.csv",
+        # marginal_accuracies="results/adult-reduced/marginal-accuracy-results.csv",
+        # runtimes="results/adult-reduced/runtime.csv",
+        # rhats="results/adult-reduced/rhats.csv",
+        # fail_counts="results/adult-reduced/fail-counts.csv",
 
 module toy_data:
     snakefile: 
@@ -254,7 +254,8 @@ rule report:
         results="results/adult-reduced/results.csv",
         accuracy="results/adult-reduced/classification-results.csv",
         rhats="results/adult-reduced/rhats.csv",
-        marginal_accuracy="results/adult-reduced/marginal-accuracy-results.csv"
+        marginal_accuracy="results/adult-reduced/marginal-accuracy-results.csv",
+        orig_result="datasets/adult-reduced/orig_result.p"
     log: 
         notebook="processed_report-adult-reduced.py.ipynb"
     threads: 1
