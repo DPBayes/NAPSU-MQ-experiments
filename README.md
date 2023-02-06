@@ -1,3 +1,10 @@
+This repository contains code to replicate the experiments in the paper
+[Noise-Aware Statistical Inference with Differentially Private Synthetic Data](https://arxiv.org/abs/2205.14485).
+
+A more user-friendly implementation of the core algorithm is available in 
+the 
+[Twinify library](https://github.com/DPBayes/twinify).
+
 # Installing Dependencies
 
 ## Python Dependencies
@@ -62,6 +69,11 @@ variables. These can be edited to run a subset of the experiments,
 or a smaller number of repeats. The toy data experiment is 
 controlled in the same way by `workflow/rules/toy-data.smk`,
 and the US Census experiment by `workflow/rules/us-census.smk`.
+
+In case the plotting notebooks
+`workflow/scripts/report.py.ipynb`, `workflow/scripts/report-adult-reduced.py.ipynb` 
+and `workflow/scripts/us-census/report.py.ipynb` fail to run with Snakemake, 
+they can be opened and run manually.
 
 # US Census Data
 
