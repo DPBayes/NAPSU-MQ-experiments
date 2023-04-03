@@ -31,11 +31,11 @@ R
 ```
 and running
 ```R
-install.package("plyr")
-install.package("data.table")
-install.package("rfast")
-install.package("parallel")
-install.package("./BayesLCM")
+install.packages("plyr")
+install.packages("data.table")
+install.packages("Rfast")
+install.packages("parallel")
+install.packages("./BayesLCM")
 ```
 
 ## Other code
