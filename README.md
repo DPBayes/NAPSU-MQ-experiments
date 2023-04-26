@@ -1,5 +1,5 @@
 This repository contains code to replicate the experiments in the paper
-[Noise-Aware Statistical Inference with Differentially Private Synthetic Data](https://arxiv.org/abs/2205.14485).
+[Noise-Aware Statistical Inference with Differentially Private Synthetic Data](https://proceedings.mlr.press/v206/raisa23a.html) (AISTATS 2023).
 
 A more user-friendly implementation of the core algorithm is available in 
 the 
